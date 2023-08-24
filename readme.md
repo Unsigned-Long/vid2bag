@@ -9,7 +9,7 @@
 # Usage
 
 ```sh
-Usage: vid2bag [--help] [--version] [--output VAR] [--scale VAR] [--gray] video
+Usage: rosrun vid2bag vid2bag_prog [--help] [--version] [--output VAR] [--scale VAR] [--gray] video
 
 Positional arguments:
   video          the path of the video 
