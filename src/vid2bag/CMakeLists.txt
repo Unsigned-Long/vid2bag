@@ -11,7 +11,9 @@ find_package(catkin REQUIRED COMPONENTS
         rospy
         cv_bridge
         roscpp
+        rosbag
         std_msgs
+        sensor_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -116,10 +118,12 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories(
-        # include
-        ${catkin_INCLUDE_DIRS}
-)
+#include_directories(
+#        # include
+#        ${catkin_INCLUDE_DIRS}
+#)
+
+find_package(OpenCV REQUIRED)
 
 ## Declare a C++ library
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src SRC_FILES)
@@ -132,6 +136,14 @@ add_library(
 target_include_directories(
         ${PROJECT_NAME}_lib PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${OpenCV_INCLUDE_DIRS}
+        ${catkin_INCLUDE_DIRS}
+)
+
+target_link_libraries(
+        ${PROJECT_NAME}_lib PUBLIC
+        ${catkin_LIBRARIES}
+        ${OpenCV_LIBS}
 )
 
 ## Add cmake target dependencies of the library
@@ -157,7 +169,6 @@ add_executable(${PROJECT_NAME}_prog exe/main.cpp)
 ## Specify libraries to link a library or executable target against
 target_link_libraries(
         ${PROJECT_NAME}_prog PUBLIC
-        ${catkin_LIBRARIES}
         ${PROJECT_NAME}_lib
 )
 

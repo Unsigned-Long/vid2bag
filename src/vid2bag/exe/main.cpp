@@ -11,6 +11,7 @@ int main(int argc, char **argv) {
     prog.add_argument("--output", "-o").help("the path of the rosbag to output").default_value("");
     prog.add_argument("--scale", "-s").help("the scale rate of image frames, range: (0.0, 1.0]").default_value(
             1.0f).scan<'f', float>();
+    prog.add_argument("--gray", "-g").implicit_value(true).default_value(false);
 
     try {
         prog.parse_args(argc, argv);
@@ -40,10 +41,22 @@ int main(int argc, char **argv) {
             throw std::runtime_error("the input scale is out of range (0.0, 1.0]");
         }
 
+        auto toGrayImg = prog.get<bool>("--gray");
+
         // display
         std::cout << "  the input video path: '" << vidPath << "'" << std::endl;
         std::cout << "the output rosbag path: '" << bagPath << "'" << std::endl;
         std::cout << "  the scale for images: '" << scale << "'" << std::endl;
+        std::cout << "convert images to gray: '" << std::boolalpha << toGrayImg << "'" << std::endl;
+
+        // process
+        auto res = ns_v2b::Vid2Bag::Create(vidPath, bagPath, scale, toGrayImg)->Process();
+
+        if (res.first) {
+            std::cout << "Process finished! See the output rosbag named '" << bagPath << "'." << std::endl;
+        } else {
+            throw std::runtime_error("Process failed! Info: '" + res.second + "'.");
+        }
     }
     catch (const std::runtime_error &err) {
         std::cerr << err.what() << std::endl;
