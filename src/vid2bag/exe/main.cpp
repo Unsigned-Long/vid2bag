@@ -6,12 +6,13 @@
 int main(int argc, char **argv) {
     ros::init(argc, argv, "vid2bag_prog_node");
 
-    argparse::ArgumentParser prog("vid2bag_argparse");
+    argparse::ArgumentParser prog("vid2bag");
     prog.add_argument("video").help("the path of the video");
     prog.add_argument("--output", "-o").help("the path of the rosbag to output").default_value("");
     prog.add_argument("--scale", "-s").help("the scale rate of image frames, range: (0.0, 1.0]").default_value(
             1.0f).scan<'f', float>();
-    prog.add_argument("--gray", "-g").implicit_value(true).default_value(false);
+    prog.add_argument("--gray", "-g").implicit_value(true).default_value(false).help(
+            "convert color images to gray ones if they are");
 
     try {
         prog.parse_args(argc, argv);
