@@ -1,4 +1,4 @@
-#include "vid2bag.h"
+#include "vid2img.h"
 #include "ros/ros.h"
 #include "filesystem"
 #include "argparse.hpp"
@@ -8,7 +8,7 @@ int main(int argc, char **argv) {
 
     argparse::ArgumentParser prog("vid2bag");
     prog.add_argument("video").help("the path of the video");
-    prog.add_argument("--output", "-o").help("the path of the rosbag to output").default_value("");
+    prog.add_argument("--output", "-o").help("the folder path to output images").default_value("");
     prog.add_argument("--scale", "-s").help("the scale rate of image frames, range: (0.0, 1.0]").default_value(
             1.0f).scan<'f', float>();
     prog.add_argument("--gray", "-g").implicit_value(true).default_value(false).help(
@@ -24,25 +24,24 @@ int main(int argc, char **argv) {
             vidPath = std::filesystem::canonical(vidPath);
         }
 
-        auto bagPath = prog.get<std::string>("--output");
-        if (bagPath.empty()) {
+        auto imgPath = prog.get<std::string>("--output");
+        if (imgPath.empty()) {
             // path not given
-            bagPath = std::filesystem::path(vidPath).replace_extension(".bag");
+            imgPath = std::filesystem::path(vidPath).parent_path().string() + "/images";
+            std::filesystem::create_directories(imgPath);
         } else {
-            auto rootPath = std::filesystem::path(bagPath).parent_path();
-            if (!exists(rootPath)) {
-                if (!std::filesystem::create_directories(rootPath)) {
+            if (!std::filesystem::exists(imgPath)) {
+                if (!std::filesystem::create_directories(imgPath)) {
                     // create path failed
-                    bagPath = std::filesystem::path(vidPath).replace_extension(".bag");
+                    imgPath = std::filesystem::path(vidPath).parent_path().string() + "/images";
+                    std::filesystem::create_directories(imgPath);
                 } else {
                     // create path succeed
-                    bagPath = std::filesystem::canonical(rootPath).string() + "/" +
-                              std::filesystem::path(bagPath).filename().string();
+                    imgPath = std::filesystem::canonical(imgPath).string();
                 }
             } else {
                 // path exists
-                bagPath = std::filesystem::canonical(rootPath).string() + "/" +
-                          std::filesystem::path(bagPath).filename().string();
+                imgPath = std::filesystem::canonical(imgPath).string();
             }
         }
 
@@ -55,15 +54,15 @@ int main(int argc, char **argv) {
 
         // display
         std::cout << "  the input video path: '" << vidPath << "'" << std::endl;
-        std::cout << "the output rosbag path: '" << bagPath << "'" << std::endl;
+        std::cout << "the output images path: '" << imgPath << "'" << std::endl;
         std::cout << "  the scale for images: '" << scale << "'" << std::endl;
         std::cout << "convert images to gray: '" << std::boolalpha << toGrayImg << "'" << std::endl;
 
         // process
-        auto res = ns_v2b::Vid2Bag::Create(vidPath, bagPath, scale, toGrayImg)->Process();
+        auto res = ns_v2i::Vid2Img::Create(vidPath, imgPath, scale, toGrayImg)->Process();
 
         if (res.first) {
-            std::cout << "Process finished! See the output rosbag named '" << bagPath << "'." << std::endl;
+            std::cout << "Process finished! See the output rosbag named '" << imgPath << "'." << std::endl;
         } else {
             throw std::runtime_error("Process failed! Info: '" + res.second + "'.");
         }

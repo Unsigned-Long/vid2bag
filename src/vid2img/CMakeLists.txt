@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(vid2bag)
+project(vid2img)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++17)
@@ -73,7 +73,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-#   std_msgs
+#   std_msgs  # Or other packages containing msgs
 # )
 
 ################################################
@@ -107,8 +107,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
         #  INCLUDE_DIRS include
-        #  LIBRARIES vid2bag
-        #  CATKIN_DEPENDS py ros roscpp std_msgs
+        #  LIBRARIES vid2img
+        #  CATKIN_DEPENDS rosbag roscpp
         #  DEPENDS system_lib
 )
 
@@ -124,6 +124,7 @@ catkin_package(
 #)
 
 find_package(OpenCV REQUIRED)
+find_package(FMT)
 
 ## Declare a C++ library
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src SRC_FILES)
@@ -144,8 +145,8 @@ target_link_libraries(
         ${PROJECT_NAME}_lib PUBLIC
         ${catkin_LIBRARIES}
         ${OpenCV_LIBS}
+        fmt::fmt
 )
-
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
@@ -219,7 +220,7 @@ target_link_libraries(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_vid2bag.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_vid2img.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
