@@ -13,7 +13,9 @@ int main(int argc, char **argv) {
             1.0f).scan<'f', float>();
     prog.add_argument("--gray", "-g").implicit_value(true).default_value(false).help(
             "convert color images to gray ones if they are");
-
+    prog.add_argument("--flip", "-f").help(
+            "flip option for the image frames, around x-axis (0), y-axis (1), both axis (-1), no flip (2)")
+            .default_value(2).scan<'d', int>();
     try {
         prog.parse_args(argc, argv);
         // get args
@@ -53,14 +55,21 @@ int main(int argc, char **argv) {
 
         auto toGrayImg = prog.get<bool>("--gray");
 
+        auto flip = prog.get<int>("--flip");
+        if(!(flip == 0 || flip == 1 || flip == -1 || flip == 2)) {
+            throw std::runtime_error("the input flip is incorrect, value has to be 0 or 1 or -1");
+        }
+
         // display
         std::cout << "  the input video path: '" << vidPath << "'" << std::endl;
         std::cout << "the output rosbag path: '" << bagPath << "'" << std::endl;
         std::cout << "  the scale for images: '" << scale << "'" << std::endl;
         std::cout << "convert images to gray: '" << std::boolalpha << toGrayImg << "'" << std::endl;
+        auto flipStr = (flip != 2) ? ((flip == 0) ? "around x-axis" : ((flip == 1) ? "around y-axis" : "around both axis")) : "no flipping";
+        std::cout << "  flip images: " << flipStr << std::endl;
 
         // process
-        auto res = ns_v2b::Vid2Bag::Create(vidPath, bagPath, scale, toGrayImg)->Process();
+        auto res = ns_v2b::Vid2Bag::Create(vidPath, bagPath, scale, toGrayImg, flip)->Process();
 
         if (res.first) {
             std::cout << "Process finished! See the output rosbag named '" << bagPath << "'." << std::endl;

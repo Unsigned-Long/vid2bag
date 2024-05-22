@@ -5,12 +5,12 @@
 
 namespace ns_v2b {
 
-    Vid2Bag::Vid2Bag(std::string videoPath, std::string rosbagPath, float scale, bool toGrayImg)
-            : _vidPath(std::move(videoPath)), _bagPath(std::move(rosbagPath)), _scale(scale), _toGray(toGrayImg) {}
+    Vid2Bag::Vid2Bag(std::string videoPath, std::string rosbagPath, float scale, bool toGrayImg, int flip)
+            : _vidPath(std::move(videoPath)), _bagPath(std::move(rosbagPath)), _scale(scale), _toGray(toGrayImg), _flip(flip) {}
 
     Vid2Bag::Ptr
-    Vid2Bag::Create(const std::string &videoPath, const std::string &rosbagPath, float scale, bool toGrayImg) {
-        return std::make_shared<Vid2Bag>(videoPath, rosbagPath, scale, toGrayImg);
+    Vid2Bag::Create(const std::string &videoPath, const std::string &rosbagPath, float scale, bool toGrayImg, int flip) {
+        return std::make_shared<Vid2Bag>(videoPath, rosbagPath, scale, toGrayImg, flip);
     }
 
     std::pair<bool, std::string> Vid2Bag::Process() {
@@ -38,6 +38,9 @@ namespace ns_v2b {
                         frame, frame,
                         cv::Size2f(static_cast<float>(frame.cols) * _scale, static_cast<float>(frame.rows) * _scale)
                 );
+            }
+            if (_flip != 2) {
+                cv::flip(frame, frame, _flip);
             }
 
             cv_bridge::CvImage cvImage;
